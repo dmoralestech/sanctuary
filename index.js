@@ -690,10 +690,7 @@
   //. > S.min('10', '2')
   //. '10'
   //. ```
-  function min(x, y) {
-    return Z.lte(x, y) ? x : y;
-  }
-  S.min = def('min', {a: [Z.Ord]}, [a, a, a], min);
+  S.min = def('min', {a: [Z.Ord]}, [a, a, a], Z.min);
 
   //# max :: Ord a => a -> a -> a
   //.
@@ -711,10 +708,7 @@
   //. > S.max('10', '2')
   //. '2'
   //. ```
-  function max(x, y) {
-    return Z.lte(x, y) ? y : x;
-  }
-  S.max = def('max', {a: [Z.Ord]}, [a, a, a], max);
+  S.max = def('max', {a: [Z.Ord]}, [a, a, a], Z.max);
 
   //# id :: Category c => TypeRep c -> c
   //.
@@ -1235,7 +1229,7 @@
     if (Array.isArray(xs)) return Array$takeWhile(pred, xs);
     var done = false;
     function takeWhileReducer(xs, x) {
-      return !done && pred(x) ? append(x, xs) : (done = true, xs);
+      return !done && pred(x) ? Z.append(x, xs) : (done = true, xs);
     }
     return Z.reduce(takeWhileReducer, Z.empty(xs.constructor), xs);
   }
@@ -1267,7 +1261,7 @@
     if (Array.isArray(xs)) return Array$dropWhile(pred, xs);
     var done = false;
     function dropWhileReducer(xs, x) {
-      return !done && pred(x) ? xs : (done = true, append(x, xs));
+      return !done && pred(x) ? xs : (done = true, Z.append(x, xs));
     }
     return Z.reduce(dropWhileReducer, Z.empty(xs.constructor), xs);
   }
@@ -3273,6 +3267,31 @@
 
   //. ### Array
 
+  //# size :: Foldable f => f a -> Integer
+  //.
+  //. Returns the number of elements of the given structure.
+  //.
+  //. ```javascript
+  //. > S.size([])
+  //. 0
+  //.
+  //. > S.size(['foo', 'bar', 'baz'])
+  //. 3
+  //.
+  //. > S.size(Nil)
+  //. 0
+  //.
+  //. > S.size(Cons('foo', Cons('bar', Cons('baz', Nil))))
+  //. 3
+  //.
+  //. > S.size(S.Nothing)
+  //. 0
+  //.
+  //. > S.size(S.Just('quux'))
+  //. 1
+  //. ```
+  S.size = def('size', {f: [Z.Foldable]}, [f(a), $.Integer], Z.size);
+
   //# append :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
   //.
   //. Returns the result of appending the first argument to the second.
@@ -3283,20 +3302,20 @@
   //. > S.append(3, [1, 2])
   //. [1, 2, 3]
   //.
+  //. > S.append(3, Cons(1, Cons(2, Nil)))
+  //. Cons(1, Cons(2, Cons(3, Nil)))
+  //.
   //. > S.append([1], S.Nothing)
   //. Just([1])
   //.
   //. > S.append([3], S.Just([1, 2]))
   //. Just([1, 2, 3])
   //. ```
-  function append(x, xs) {
-    return Z.concat(xs, Z.of(xs.constructor, x));
-  }
   S.append =
   def('append',
       {f: [Z.Applicative, Z.Semigroup]},
       [a, f(a), f(a)],
-      append);
+      Z.append);
 
   //# prepend :: (Applicative f, Semigroup (f a)) => a -> f a -> f a
   //.
@@ -3308,20 +3327,20 @@
   //. > S.prepend(1, [2, 3])
   //. [1, 2, 3]
   //.
+  //. > S.prepend(1, Cons(2, Cons(3, Nil)))
+  //. Cons(1, Cons(2, Cons(3, Nil)))
+  //.
   //. > S.prepend([1], S.Nothing)
   //. Just([1])
   //.
   //. > S.prepend([1], S.Just([2, 3]))
   //. Just([1, 2, 3])
   //. ```
-  function prepend(x, xs) {
-    return Z.concat(Z.of(xs.constructor, x), xs);
-  }
   S.prepend =
   def('prepend',
       {f: [Z.Applicative, Z.Semigroup]},
       [a, f(a), f(a)],
-      prepend);
+      Z.prepend);
 
   //# joinWith :: String -> Array String -> String
   //.

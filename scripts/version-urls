@@ -19,6 +19,6 @@ process.stdout.write(fs.readFileSync(process.argv[2], 'utf8').replace(
              '/tree/v' + deps[name] + parts.slice(1).join('');
     }
     process.stderr.write('Exact version not specified for ' + name + '\n');
-    process.exit(1);
+//  process.exit(1);
   }
 ));
